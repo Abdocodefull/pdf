@@ -43,6 +43,7 @@ async function convertFilesToDataURLs(
 export default function Chat() {
   const [input, setInput] = useState("")
   const [files, setFiles] = useState<FileList | undefined>(undefined)
+  const [error, setError] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { messages, sendMessage, isLoading } = useChat({
@@ -53,20 +54,36 @@ export default function Chat() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
+    setError("")
 
     if (!input.trim() && (!files || files.length === 0)) return
 
-    const fileParts = files && files.length > 0 ? await convertFilesToDataURLs(files) : []
+    // تحقق من حجم الملف (الحد الأقصى 10MB)
+    if (files && files.length > 0) {
+      const file = files[0]
+      const maxSize = 10 * 1024 * 1024 // 10MB
+      if (file.size > maxSize) {
+        setError("حجم الملف كبير جداً! الحد الأقصى هو 10 ميجابايت")
+        return
+      }
+    }
 
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: input }, ...fileParts],
-    })
+    try {
+      const fileParts = files && files.length > 0 ? await convertFilesToDataURLs(files) : []
 
-    setInput("")
-    setFiles(undefined)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
+      sendMessage({
+        role: "user",
+        parts: [{ type: "text", text: input }, ...fileParts],
+      })
+
+      setInput("")
+      setFiles(undefined)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    } catch (error) {
+      console.error("خطأ في إرسال الرسالة:", error)
+      setError("حدث خطأ في إرسال الرسالة. تأكد من حجم الملف وحاول مرة أخرى.")
     }
   }
 
@@ -351,7 +368,12 @@ export default function Chat() {
                       {files && files.length > 0 ? (
                         <div className="flex items-center justify-center gap-4 text-lg bg-green-100 text-green-800 px-8 py-4 rounded-2xl border border-green-300">
                           <FileText className="h-7 w-7" />
-                          <span className="font-bold">{files[0].name}</span>
+                          <div className="flex flex-col items-center">
+                            <span className="font-bold">{files[0].name}</span>
+                            <span className="text-sm text-green-600">
+                              {(files[0].size / (1024 * 1024)).toFixed(2)} ميجابايت
+                            </span>
+                          </div>
                           <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
                         </div>
                       ) : (
@@ -359,6 +381,18 @@ export default function Chat() {
                       )}
                     </div>
                   </div>
+
+                  {/* Error Message */}
+                  {error && (
+                    <div className="p-6 bg-red-50 border-2 border-red-200 rounded-2xl">
+                      <div className="flex items-center gap-3 text-red-700">
+                        <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-sm font-bold">!</span>
+                        </div>
+                        <span className="text-lg font-medium">{error}</span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Message Input Area */}
                   <div className="flex gap-6">
