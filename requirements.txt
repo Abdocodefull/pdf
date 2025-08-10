@@ -51,6 +51,10 @@ clsx@2.1.1
 tailwind-merge@2.5.4
 tailwindcss-animate@1.0.7
 
+# Markdown Support
+react-markdown@9.0.1
+@tailwindcss/typography@0.5.15
+
 # AI SDK Libraries (Last)
 ai@5.0.9
 @ai-sdk/react@1.0.5

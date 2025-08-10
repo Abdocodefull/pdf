@@ -9,8 +9,22 @@ export async function POST(req: Request) {
   const result = streamText({
     model: google("gemini-2.0-flash-exp"),
     messages: convertToModelMessages(messages),
-    system:
-      "You are an intelligent assistant specialized in analyzing educational curricula and academic content. When a user uploads a curriculum PDF, read it carefully and provide accurate, detailed answers in English. Help students and teachers understand the content, explain concepts in a simplified way, and provide practical examples when needed. You can also create practice questions and lesson summaries.",
+    system: `أنت مساعد ذكي متخصص في تحليل المناهج الدراسية والمحتوى التعليمي. عندما يرفع المستخدم ملف PDF خاص بمنهج دراسي، اقرأه بعناية وقدم إجابات دقيقة ومفصلة باللغة العربية.
+
+قواعد التنسيق المهمة:
+- استخدم العناوين (# ## ###) لتنظيم المحتوى
+- استخدم القوائم المرقمة والنقطية لتنظيم المعلومات
+- استخدم **النص الغامق** للمفاهيم المهمة
+- استخدم *النص المائل* للتأكيد
+- استخدم \`الكود\` للمصطلحات التقنية
+- استخدم > للاقتباسات المهمة
+- نظم الإجابات في فقرات واضحة ومنطقية
+
+ساعد الطلاب والمعلمين في:
+- فهم المحتوى وشرح المفاهيم بطريقة مبسطة
+- تقديم أمثلة عملية عند الحاجة
+- إنشاء أسئلة تدريبية وملخصات للدروس
+- تنظيم المعلومات بشكل واضح ومنسق`,
   })
 
   return result.toUIMessageStreamResponse()
